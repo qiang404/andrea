@@ -1,12 +1,12 @@
 <template>
   <div id="tabbar">
-    <MainTabbar>
+    <MainTabbar :color="'white'">
       <TabbarItem :path="'/home'">
         <i slot="item-icon" class="iconfont icon-shouye"></i>
         <p slot="item-text">首页</p>
       </TabbarItem>
       <TabbarItem :path="'/sort'">
-        <i slot="item-icon" class="iconfont icon-leimupinleifenleileibie"></i>
+        <i slot="item-icon" class="iconfont icon-fenlei"></i>
         <p slot="item-text">分类</p>
       </TabbarItem>
       <TabbarItem :path="'/cart'">
@@ -14,7 +14,7 @@
         <p slot="item-text">购物车</p>
       </TabbarItem>
       <TabbarItem :path="'/mine'">
-        <i slot="item-icon" class="iconfont icon-wode"></i>
+        <img slot="item-icon" src="@/assets/img/mine.png">
         <p slot="item-text">我的</p>
       </TabbarItem>
     </MainTabbar>
@@ -22,8 +22,8 @@
 </template>
 
 <script>
-import MainTabbar from "@/components/Tabbar/mainTabbar.vue";
-import TabbarItem from "@/components/Tabbar/tabbarItem.vue";
+import MainTabbar from "@/components/common/Tabbar/mainTabbar.vue";
+import TabbarItem from "@/components/common/Tabbar/tabbarItem.vue";
 
 export default {
 
@@ -38,10 +38,16 @@ export default {
 <style lang="less" scoped>
 #tabbar{
   i{
-    font-size: 20px;
+    font-size: 40px;
   }
   p{
-    font-size: 12px;
+    font-size: 24px;
+  }
+  img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-bottom: 4px;
   }
 }
 </style>

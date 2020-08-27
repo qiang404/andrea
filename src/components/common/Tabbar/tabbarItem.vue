@@ -16,7 +16,7 @@ export default {
   },
   computed: {
     active(){
-      return this.$route.path.indexOf(this.path) !== -1 ?{color:'#ff3344'} :{}
+      return this.$route.path.indexOf(this.path) !== -1 ?{color:'#f69736'} :{}
     }
   },
   methods: {
