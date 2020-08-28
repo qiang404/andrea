@@ -18,7 +18,7 @@ export default {
     background-color: #fff;
     display: flex;
     justify-content: space-between;
-    padding: 0 35px;
+    padding: 0 30px;
     height: 108px;
     align-items: center;
     font-weight: bold;

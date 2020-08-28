@@ -37,6 +37,11 @@ export default {
 </script>
 <style lang="less" scoped>
 #tabbar{
+  height: 100px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
   i{
     font-size: 40px;
   }

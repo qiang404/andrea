@@ -6,7 +6,7 @@
 
 <script>
 import BScroll from 'better-scroll'
-import {debounce} from '@/assets/js/Ulits'
+import {throttle} from '@/assets/js/Ulits'
 export default {
     name : 'Scroller',
     data() {
@@ -20,17 +20,20 @@ export default {
             type:Function,
             default:function () {}
         },
+        click:{
+            type:Boolean,
+            default:false
+        }
     },
     mounted() {
          this.scroll = new BScroll(this.$refs.wrapper,{
             tap:true,
             probeType:1,
-            pullUpLoad: true
+            pullUpLoad: true,
+            scrollX:true,
+            click:this.click
         })
-        this.fangdou = debounce(this.handleToPullUp,500)
-        this.scroll.on('pullingUp',() => {
-            this.fangdou()
-        })
+        this.scroll.on('pullingUp',throttle(this.handleToPullUp,500))
     }
 
 }
