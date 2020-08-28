@@ -2,7 +2,7 @@
   <div class="swiper-container" ref="swiper">
     <ul class="swiper-wrapper">
       <li class="swiper-slide" v-for="(item, index) in swiperList" :key="index">
-        <img v-lazy="item.imgUrl" alt="" />
+        <img class="jiujishabi" :src="item.imgUrl" alt="" />
       </li>
     </ul>
   </div>
@@ -31,13 +31,8 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-.swiper-container {
-    width: 704px;
-    height: 326px;
-    border-radius: 20px;
-  img {
-    width: 704px;
-    height: 326px;
-  }
+img{
+  width: inherit;
+  height: inherit;
 }
 </style>

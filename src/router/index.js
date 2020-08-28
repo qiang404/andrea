@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+
+
 Vue.use(VueRouter)
 
   const routes = [
@@ -9,7 +11,7 @@ Vue.use(VueRouter)
   },
   {
     path: '/home',
-    component: () => import('@/views/Home')
+    component : () => import ('@/views/Home'),
   },
   {
     path: '/sort',
@@ -22,6 +24,10 @@ Vue.use(VueRouter)
   {
     path: '/mine',
     component: () => import('@/views/Mine')
+  },
+  {
+    path :'/detail/:cid',
+    component:() => import('@/components/Detail')
   }
 ]
 

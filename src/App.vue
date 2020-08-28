@@ -3,16 +3,11 @@
     <keep-alive>
     <router-view/>
     </keep-alive>
-    <Tabbar/>
   </div>
 </template>
 <script>
-import Tabbar from '@/components/common/Tabbar'
 export default {
-    name: 'App',
-    components:{
-      Tabbar,
-    }
+    name: 'App'
 }
 </script>
 <style>
