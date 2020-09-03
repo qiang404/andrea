@@ -1,0 +1,75 @@
+<template>
+	<div v-show="showToast" class="lx-toast" :class="type">
+		{{msg}}
+	</div>
+</template>
+
+<script>
+	export default {
+		data: function () {
+			return {
+				showToast:false,
+				msg:'',
+				type:''
+			}
+		},
+		name: 'Toast'
+	};
+</script>
+
+<style lang="less" scoped>
+	.lx-toast {
+		position: fixed;
+		bottom: 100px;
+		left: 50%;
+		box-sizing: border-box;
+		max-width: 80%;
+		height: 80px;
+		line-height: 60px;
+		padding: 10px 20px;
+		transform: translateX(-50%);
+		-webkit-transform: translateX(-50%);
+		text-align: center;
+		z-index: 9999;
+		font-size: 14px;
+		color: #fff;
+		border-radius: 5px;
+		background: rgba(0, 0, 0, 0.7);
+		animation: show-toast .5s;
+		-webkit-animation: show-toast .5s;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.lx-toast.lx-word-wrap {
+		width: 80%;
+		white-space: inherit;
+		height: auto;
+	}
+
+	.lx-toast.lx-toast-top {
+		top: 50px;
+		bottom: inherit;
+	}
+
+	.lx-toast.lx-toast-center {
+		top: 50%;
+		margin-top: -20px;
+		bottom: inherit;
+	}
+
+	@keyframes show-toast {
+		from {
+			opacity: 0;
+			transform: translate(-50%, -10px);
+			-webkit-transform: translate(-50%, -10px);
+		}
+
+		to {
+			opacity: 1;
+			transform: translate(-50%, 0);
+			-webkit-transform: translate(-50%, 0);
+		}
+	}
+</style>

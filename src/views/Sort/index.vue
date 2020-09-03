@@ -4,13 +4,13 @@
       <span slot="left"></span>
       <div slot="middle" class="serach">
         <i class="iconfont icon-sousuo"></i>
-        <input type="text" placeholder="安德莉亚奶油蛋糕" />
+        <input type="text" placeholder="安德莉亚奶油蛋糕" v-model="keyword" />
       </div>
       <span slot="right"></span>
     </Header>
-    <Sortnav :sortList="sortList" />
+    <Sortnav :sortList="sortList" @filterCake="filterCake"/>
     <Swiper :swiperList="swiperList" />
-    <Products :productList="productList" :h="'818px'"/>
+    <Products :productList="productList" :searchRes="searchRes" :h="'815px'" @getCake="getCake" :hasMore="hasMore" />
     <router-view></router-view>
 
     <Tabbar />
@@ -18,136 +18,158 @@
 </template>
 
 <script>
-import Header from "@/components/common/Header";
-import Tabbar from "@/components/common/Tabbar";
-import Sortnav from "@/views/Sort/Sortnav";
-import Swiper from "@/components/common/Swiper";
-import Products from "@/components/products";
-export default {
-  name: "Sort",
-  components: {
-    Header,
-    Tabbar,
-    Sortnav,
-    Swiper,
-    Products,
-  },
-  data() {
-    return {
-      swiperList: [
-        {
-          name: "swiper1",
-          imgUrl: "http://ehelp.hyyclub.xyz/images/swiper/banner1.png",
-        },
-        {
-          name: "swiper2",
-          imgUrl: "http://ehelp.hyyclub.xyz/images/swiper/banner2.png",
-        },
-        {
-          name: "swiper3",
-          imgUrl: "http://ehelp.hyyclub.xyz/images/swiper/banner3.png",
-        },
-      ],
-      productList: [
-        {
-          name: "巧克力千层蛋糕",
-          imgurl: "http://ehelp.hyyclub.xyz/images/swiper/cake1.png",
-          price: "25.00",
-          cid: 1,
-        },
-        {
-          name: "松软牛角面包(纯手工)",
-          imgurl: "http://ehelp.hyyclub.xyz/images/swiper/cake2.png",
-          price: "7.00",
-          cid: 2,
-        },
-        {
-          name: "蜜红豆面包",
-          imgurl: "http://ehelp.hyyclub.xyz/images/swiper/cake3.png",
-          price: "10.00",
-          cid: 3,
-        },
-        {
-          name: "草莓果酱蛋糕",
-          imgurl: "http://ehelp.hyyclub.xyz/images/swiper/cake4.png",
-          price: "35.00",
-          cid: 4,
-        },
-        {
-          name: "巧克力千层蛋糕",
-          imgurl: "http://ehelp.hyyclub.xyz/images/swiper/cake1.png",
-          price: "25.00",
-          cid: 5,
-        },
-        {
-          name: "松软牛角面包(纯手工)",
-          imgurl: "http://ehelp.hyyclub.xyz/images/swiper/cake2.png",
-          price: "7.00",
-          cid: 6,
-        },
-        {
-          name: "蜜红豆面包",
-          imgurl: "http://ehelp.hyyclub.xyz/images/swiper/cake3.png",
-          price: "10.00",
-          cid: 7,
-        },
-        {
-          name: "草莓果酱蛋糕",
-          imgurl: "http://ehelp.hyyclub.xyz/images/swiper/cake4.png",
-          price: "35.00",
-          cid: 8,
-        },
-         {
-          name: "蜜红豆面包",
-          imgurl: "http://ehelp.hyyclub.xyz/images/swiper/cake3.png",
-          price: "10.00",
-          cid: 9,
-        },
-        {
-          name: "草莓果酱蛋糕",
-          imgurl: "http://ehelp.hyyclub.xyz/images/swiper/cake4.png",
-          price: "35.00",
-          cid: 10,
-        },
-      ],
-      sortList:['精选','玛芬蛋糕','威风蛋糕','天使蛋糕','重油蛋糕','天使蛋糕','重油蛋糕']
-    };
-  },
-};
+  import Header from "@/components/common/Header";
+  import Tabbar from "@/components/common/Tabbar";
+  import Sortnav from "@/views/Sort/Sortnav";
+  import Swiper from "@/components/common/Swiper";
+  import Products from "@/components/Products";
+  import {
+    getBanner
+  } from '@/network/getBanner'
+  import {
+    getProduct
+  } from '@/network/getProduct'
+  import {
+    debounce
+  } from '@/assets/js/Ulits'
+  export default {
+    name: "Sort",
+    components: {
+      Header,
+      Tabbar,
+      Sortnav,
+      Swiper,
+      Products,
+    },
+    data() {
+      return {
+        swiperList: [],
+        productList: [],
+        sortList: [],
+        pageindex: 2,
+        hasMore: true,
+        searchRes: true,
+        keyword: '',
+        debounce: null
+      };
+    },
+    mounted() {
+      getBanner(3, data => {
+        this.swiperList = data
+      })
+      let sortConfig = {
+        url: '/categoiry/query',
+        method: 'post'
+      }
+      this.$request(sortConfig).then(res => {
+        if (res.status === 0) {
+          this.sortList = res.table.sort(sortId)
+          this.sortList.unshift({
+            categoryname: '精选',
+            id: 0
+          })
+        }
+
+        function sortId(a, b) {
+          return a.id - b.id
+        }
+      })
+      this.init()
+      this.debounce = debounce(this.search, 500)
+    },
+    methods: {
+
+      // 上拉加载更多
+      getCake(scroll) {
+        getProduct(8, this.pageindex++, this.keyword, this.$store.state.sortType, ).then(res => {
+          if (res.length === 0) {
+            this.hasMore = false
+            scroll && scroll.finishPullUp()
+            this.$toast('我也是有底线的','center',1000)
+            return
+          }
+          this.productList = this.productList.concat(res)
+          scroll && scroll.finishPullUp()
+        })
+      },
+      // 筛选
+      filterCake(id) {
+        getProduct(8, 1, this.keyword, id ? id : '').then(res => {
+          if (res.length === 0) {
+            this.searchRes = false
+          } else {
+            this.searchRes = true
+          }
+          this.productList = res
+        })
+      },
+      search() {
+        getProduct(8, 1, this.keyword, this.$store.state.sortType).then(res => {
+          if (res.length === 0) {
+            this.searchRes = false
+          } else {
+            this.searchRes = true
+          }
+          this.productList = res
+        })
+        this.pageindex == 2
+      },
+      init() {
+        getProduct(8,1,this.keyword,this.$store.state.sortType).then(res => {
+          this.productList = res
+        })
+      }
+    },
+    watch: {
+       keyword(newVal) {
+      if (newVal === '') {
+        this.pageindex = 2
+        this.init()
+      } else {
+        this.debounce()
+      }
+    }
+    }
+  };
 </script>
 <style lang="less" scoped>
-#sort {
-   background-color: #f6f6f6;
-   height: 2300px;
-  .serach {
-    width: 649px;
-    height: 63px;
+  #sort {
     background-color: #f6f6f6;
-    border-radius: 60px;
-    display: flex;
-    align-items: center;
-    i {
-      opacity: 0.68;
-      margin-left: 50px;
-      margin-right: 23px;
-    }
-    input {
-      border: none;
-      outline: none;
-      height: 100%;
+    height: 2300px;
+
+    .serach {
+      width: 649px;
+      height: 63px;
       background-color: #f6f6f6;
-      width: 80%;
-      border-radius: 0 60px 60px 0;
+      border-radius: 60px;
+      display: flex;
+      align-items: center;
+
+      i {
+        opacity: 0.68;
+        margin-left: 50px;
+        margin-right: 23px;
+      }
+
+      input {
+        border: none;
+        outline: none;
+        height: 100%;
+        background-color: #f6f6f6;
+        width: 80%;
+        border-radius: 0 60px 60px 0;
+      }
     }
-  }
-  .swiper-container {
-    width: 718px;
-    height: 424px;
-    border-radius: 20px;
-    .swiper-item {
+
+    .swiper-container {
       width: 718px;
       height: 424px;
+      border-radius: 20px;
+
+      .swiper-item {
+        width: 718px;
+        height: 424px;
+      }
     }
   }
-}
 </style>

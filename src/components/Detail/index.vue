@@ -9,25 +9,33 @@
     <div class="name">
       <span>
         <p>{{ productDetail.name }}</p>
-        <b>{{ productDetail.price }}</b>
+        <b>{{ productDetail.stock }}</b>
       </span>
       <span>库存{{ productDetail.stock }}</span>
     </div>
     <div class="express">
-      <span>运费 {{ productDetail.baoyou }}</span>
+      <span>运费 包邮</span>
       <span>销量 {{ productDetail.salenumber }}</span>
     </div>
     <div class="peisong">
       <span>配送：同城送、快递、自提</span>
       <i class="iconfont icon-iconfontjiantou5"></i>
     </div>
-    <div class="detail"></div>
+    <div class="detail">
+        <h5>商品详情</h5>
+        <span>蛋糕类型:&#32;巧克力蛋糕</span>
+        <span>主要原料:&#32;奶油、巧克力、可可粉</span>
+        <span>蛋糕口味:&#32;巧克力味</span>
+        <span>赠送配件:&#32;蛋糕叉、蛋糕碟</span>
+        <span>保鲜条件:&#32;0-4℃冷藏储存，收到蛋糕后3小时内使用最佳</span>
+        <img :src="productDetail.imageurl" >
+    </div>
     <div class="buy">
       <span><i class="iconfont icon-dianpu"></i><b>店铺</b></span>
       <span><i class="iconfont icon-liaotian"></i><b>客服</b></span>
       <span><i class="iconfont icon-shoucang"></i><b>收藏</b></span>
       <div @click="addGoods">加入购物车</div>
-      <div>立即购买</div>
+      <div @click="buy">立即购买</div>
     </div>
   </div>
 </template>
@@ -35,6 +43,10 @@
 <script>
 import Header from "@/components/common/Header";
 import Swiper from "@/components/common/Swiper";
+
+import {getProduct} from '@/network/getProduct'
+import {getBanner} from '@/network/getBanner'
+import {pushToCart} from '@/assets/js/Ulits'
 export default {
   name: "Detail",
   components: {
@@ -43,27 +55,8 @@ export default {
   },
   data() {
     return {
-      swiperList: [
-        {
-          name: "swiper1",
-          imgUrl: "http://ehelp.hyyclub.xyz/images/swiper/banner1.png",
-        },
-        {
-          name: "swiper2",
-          imgUrl: "http://ehelp.hyyclub.xyz/images/swiper/banner2.png",
-        },
-        {
-          name: "swiper3",
-          imgUrl: "http://ehelp.hyyclub.xyz/images/swiper/banner3.png",
-        },
-      ],
-      productDetail: {
-        name: "巧克力千层蛋糕",
-        price: "35.00",
-        stock: "203",
-        baoyou: "包邮",
-        salenumber: "98",
-      },
+      swiperList: [],
+      productDetail: {},
     };
 	},
 	methods: {
@@ -71,15 +64,27 @@ export default {
 			this.$router.back()
     },
     addGoods() {
-      
+      pushToCart.call(this,this.productDetail)
+    },
+    buy() {
+
     }
-	}
+  },
+  activated() {
+    getProduct(1,1,this.$route.params.name,'',).then(res => {
+      this.productDetail = res[0]
+    }),
+    getBanner(3,res=> {
+      this.swiperList = res
+    })
+  }
 };
 </script>
 <style lang="less" scoped>
 #detail {
   height: 100%;
   background-color: #f6f6f6;
+  margin-bottom: 110px;
   .swiper-container {
     width: 100%;
     height: 479px;
@@ -205,6 +210,34 @@ export default {
       &:nth-child(5) {
         background-color: #f20202;
       }
+    }
+  }
+  .detail{
+    display: flex;
+    flex-direction: column;
+    h5{
+      margin: 40px auto;
+    }
+    h5::before {
+      content: '';
+      display: inline-block;
+      width: 60px;
+      border-top: 1px solid black;
+      margin-bottom: 8px;
+      margin-right: 10px;
+    }
+      h5::after {
+      content: '';
+      display: inline-block;
+      width: 60px;
+      border-top: 1px solid black;
+      margin-bottom: 8px;
+      margin-left: 10px;
+    }
+    span {
+      font-size: 16px;
+      // margin-left: 35px;
+      margin: 10px 0 10px 35px;
     }
   }
 }

@@ -2,13 +2,8 @@
   <div class="navbar">
     <Scroller>
       <ul>
-        <li
-          v-for="(item, index) in sortList"
-          :key="index"
-          :class="currentIndex === index ? 'active' : ''"
-          @tap="commitSort(index)"
-        >
-          {{ item }}
+        <li v-for="(item, index) in sortList" :key="item.id" :class="currentIndex === index ? 'active' : ''" @tap="commitSort(index,item.id)">
+          {{ item.categoryname }}
         </li>
       </ul>
     </Scroller>
@@ -16,6 +11,7 @@
 </template>
  
 <script>
+
 export default {
   name: "Navbar",
   data() {
@@ -30,9 +26,10 @@ export default {
     },
   },
   methods: {
-    commitSort(index) {
+    commitSort(index,id) {
       this.currentIndex = index;
-      this.$store.commit("changeSortType", index);
+      this.$store.commit("changeSortType", id);
+      this.$emit('filterCake',id)
     },
   },
 };
