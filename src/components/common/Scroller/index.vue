@@ -12,7 +12,6 @@ export default {
     data() {
         return {
             scroll: null,
-            fangdou: null
         }
     },
     props:{

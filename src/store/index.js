@@ -7,7 +7,10 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    sortType:0
+    sortType:0,
+    token:'',
+    user:'',
+    shopCarList:[]
   },
   mutations,
   actions,

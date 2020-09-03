@@ -1,100 +1,139 @@
 <template>
   <div class="products" :style="hStyle">
     <div class="hide" :style="hStyle">
-      <Scroller :handleToPullUp="getMoreCakes" ref="scroll">
+      <Scroller v-if="searchRes" :handleToPullUp="getMoreCakes" ref="scroll">
         <ul>
-          <li class="cake" v-for="item in productList" :key="item.cid">
-            <img @tap="handleToDetail(item.cid)" v-lazy="item.imgurl" alt="" />
-            <p @tap="handleToDetail(item.cid)">{{ item.name }}</p>
+          <li class="cake" v-for="(item,index) in productList" :key="item.id">
+            <img @tap="handleToDetail(item.name)" v-lazy="item.imageurl" alt="" />
+            <p @tap="handleToDetail(item.name)">{{ item.name }}</p>
             <div class="price">
-              <b>￥{{ item.price }}</b>
-              <i class="iconfont icon-gouwuche"></i>
+              <b>￥{{ item.stock }}</b>
+              <i class="iconfont icon-gouwuche" @tap="addGoods(index)"></i>
             </div>
           </li>
         </ul>
       </Scroller>
+      <h3 v-else >好像什么也没有</h3>
     </div>
   </div>
 </template>
 
 <script>
-export default {
-  name: "Products",
-  props: {
-    productList: {
-      type: Array,
-      default: [],
+import {pushToCart} from '@/assets/js/Ulits'
+  export default {
+    name: "Products",
+    props: {
+      productList: {
+        type: Array,
+        default: [],
+      },
+      h: {
+        type: String,
+        default: '450px'
+      },
+      hasMore: {
+        type: Boolean,
+        default: true
+      },
+       searchRes: {
+        type: Boolean,
+        default: true
+      },
+      
     },
-    h:{
-      tyep:String,
-      default:'450px'
-    }
-  },
-  data() {
-    return {
-      hStyle:{'height':this.h}
-    }
-  },
-  methods: {
-    getMoreCakes() {
-      console.log("请求更多数据了");
-      this.$refs.scroll.scroll.finishPullUp();
-    },
-    handleToDetail(cid) {
-      this.$router.push("/detail/" + cid);
-    },
-  },
-  updated() {
-    this.$refs.scroll.scroll.refresh();
-  },
-};
-</script>
-<style lang="less" scoped>
-.products {
-  width: 704px;
-  margin: 0 auto;
-  height: 1000px;
-  margin-bottom: 110px;
-  .hide {
-    overflow: hidden;
-    height: 890px;
-  }
-  ul {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-top: 18px;
-    overflow: hidden;
-    .cake {
-      width: 330px;
-      height: 394px;
-      background-color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 14px;
-      justify-content: space-between;
-      img {
-        width: 330px;
-        height: 260px;
-      }
-      p {
-        font-size: 30px;
-        color: #030202;
-        margin-left: 23px;
-        margin-top: 30px;
-      }
-      .price {
-        display: flex;
-        justify-content: space-between;
-        padding: 20px;
-        align-items: center;
-        margin-bottom: 20px;
-        b {
-          font-size: 30px;
-          color: #fb0606;
+    data() {
+      return {
+        hStyle: {
+          'height': this.h
         }
       }
+    },
+    methods: {
+      getMoreCakes() {
+        if (this.hasMore) {
+          this.$emit('getCake', this.$refs.scroll.scroll)
+        } else {
+          this.$toast('我也是有底线的','center',1000)
+          this.$refs.scroll.scroll.finishPullUp();
+        }
+      },
+      handleToDetail(name) {
+          this.$router.push("/detail/" + name);
+      },
+      addGoods(index) {
+        pushToCart.call(this,[this.productList[index]])
+      }
+    },
+    updated() {
+      if (this.productList.length > 0)
+      this.$refs.scroll.scroll.refresh();
+    },
+  };
+</script>
+<style lang="less" scoped>
+  .products {
+    width: 704px;
+    margin: 0 auto;
+    height: 1100px;
+    margin-bottom: 110px;
+
+    .hide {
+      overflow: hidden;
+      height: 890px;
+      h3{
+        width: fit-content;
+        margin: 50px auto;
+      }
+    }
+
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-top: 18px;
+      overflow: hidden;
+
+      .cake {
+        width: 330px;
+        height: 394px;
+        background-color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 14px;
+        justify-content: space-between;
+
+        img {
+          width: 330px;
+          height: 260px;
+        }
+
+        p {
+          font-size: 30px;
+          color: #030202;
+          margin-left: 23px;
+          margin-top: 30px;
+        }
+
+        .price {
+          display: flex;
+          justify-content: space-between;
+          padding: 20px;
+          align-items: center;
+          margin-bottom: 20px;
+
+          b {
+            font-size: 30px;
+            color: #fb0606;
+          }
+        }
+      }
+
+      span {
+        display: block;
+        margin: 0 auto;
+        width: 200px;
+        font-size: 28px;
+      }
     }
   }
-}
 </style>

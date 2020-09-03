@@ -6,7 +6,7 @@
         <p slot="item-text">首页</p>
       </TabbarItem>
       <TabbarItem :path="'/sort'">
-        <i slot="item-icon" class="iconfont icon-fenlei"></i>
+        <i slot="item-icon" class="iconfont icon-fenleishouye"></i>
         <p slot="item-text">分类</p>
       </TabbarItem>
       <TabbarItem :path="'/cart'">

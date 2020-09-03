@@ -1,6 +1,14 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import store from '@/store'
+import MineRouter from './Mine'
 
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location, onResolve, onReject) {
+ if (onResolve || onReject) return originalPush.call(this, location, onResolve,
+onReject)
+ return originalPush.call(this, location).catch(err => err)
+}
 
 Vue.use(VueRouter)
 
@@ -12,29 +20,78 @@ Vue.use(VueRouter)
   {
     path: '/home',
     component : () => import ('@/views/Home'),
+    name:'Home'
   },
   {
     path: '/sort',
-    component: () => import('@/views/Sort')
+    component: () => import('@/views/Sort'),
+    name:'Sort'
   },
   {
     path: '/cart',
-    component: () => import('@/views/Cart')
+    component: () => import('@/views/Cart'),
+    name:'Cart',
+    meta: {
+      requireAuth:true
+    }
+  },
+  
+  {
+    path :'/detail/:name',
+    component:() => import('@/components/Detail'),
+    name:'Detail'
   },
   {
     path: '/mine',
-    component: () => import('@/views/Mine')
+    component: () => import('@/views/Mine'),
+    meta: {
+      requireAuth:true
+    },
+    children: [{
+            path: 'login',
+            component: () => import('@/components/Login'),
+            name: 'Login',
+            meta: {
+              from:''
+            },
+            beforeEnter: (to, from, next) => {
+              if (Object.keys(to.params).length === 0) {
+                to.params.from = from.path
+              }
+              next()
+            }
+        },
+        {
+            path: 'register',
+            component: () => import('@/components/Register'),
+            name: 'Register'
+        }
+    ],
+    name: 'Mine'
   },
   {
-    path :'/detail/:cid',
-    component:() => import('@/components/Detail')
+    path:'/address',
+    component: () => import('@/components/Address/index.vue'),
+    name: 'Address'
+  },
+  {
+    path: '/toast',
+    component: () => import('@/components/common/Toast/toast')
   }
 ]
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
-  routes
+  routes,
+  
 })
-
+router.beforeEach((to, from, next) => {
+  if (to.meta.requireAuth && !store.state.token) {
+    next({name: 'Login',params:{from:to.path}})
+  }
+  else {
+    next()
+  }
+})
 export default router

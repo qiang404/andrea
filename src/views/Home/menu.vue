@@ -4,8 +4,8 @@
       <i class="iconfont icon-laba"></i>
       <div class="swiper-container" ref="broadcast">
         <div class="swiper-wrapper">
-          <div class="swiper-slide">
-            <p>稀奶油蛋糕产品新上线</p>
+          <div class="swiper-slide" v-for="item in newsList" :key="item.id">
+            <p>{{item.title}}</p>
           </div>
         </div>
       </div>
@@ -38,11 +38,19 @@ import Swiper from "swiper";
 import "swiper/dist/css/swiper.css";
 export default {
   name: "Menu",
-  mounted() {
+  props:{
+    newsList:{
+      type:Array,
+      default:[]
+    }
+  },
+  activated() {
     new Swiper(this.$refs.broadcast, {
       direction: "vertical",
       autoplay: true,
       loop: true,
+      observer:true,
+      observeParents:true
     });
   },
 };

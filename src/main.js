@@ -5,8 +5,16 @@ import store from './store'
 import VueLazyLoad from 'vue-lazyload'
 
 import Scroller from '@/components/common/Scroller'
+import Toast from '@/components/common/Toast/toast'
+import Loading from '@/components/common/Toast/loading'
+import {request} from '@/network/request'
+
+Vue.prototype.$request = request
+
 Vue.component('Scroller',Scroller)
 
+Vue.use(Toast)
+Vue.use(Loading)
 Vue.use(VueLazyLoad,{
   loading:require('./assets/img/lazy.gif')
 })
