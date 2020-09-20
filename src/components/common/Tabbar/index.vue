@@ -14,7 +14,8 @@
         <p slot="item-text">购物车</p>
       </TabbarItem>
       <TabbarItem :path="'/mine'">
-        <img slot="item-icon" src="@/assets/img/mine.png">
+        <img v-if="this.$store.state.user.imgurl" slot="item-icon" :src="this.$store.state.user.imgurl">
+        <i v-else class="iconfont icon-wode" slot="item-icon"></i>
         <p slot="item-text">我的</p>
       </TabbarItem>
     </MainTabbar>

@@ -18,7 +18,7 @@
 					<span>取消预约</span><span>确认收货</span>
 				</div>
 			</li>
-				<li>
+			<li>
 				<div class="orderNum">
 					<span>订单号：20200309162</span>
 					<span>进行中</span>
@@ -55,7 +55,7 @@
 				display: flex;
 				flex-direction: column;
 				padding: 0 20px;
-		background-color: #fff;
+				background-color: #fff;
 
 				.orderNum {
 					display: flex;
@@ -66,42 +66,50 @@
 					font-weight: 500;
 					font-size: 28px;
 				}
-				.main{
+
+				.main {
 					display: flex;
 					border-bottom: 4px solid #f6f6f6;
 					height: 200px;
 					align-items: center;
-					img{
+
+					img {
 						width: 180px;
 						height: 160px;
-						margin:0 15px;
+						margin: 0 15px;
 					}
-					.intro{
+
+					.intro {
 						height: 160px;
 						display: flex;
 						flex-direction: column;
-						span{
-							flex:1;
+
+						span {
+							flex: 1;
 						}
+
 						span:nth-child(1) {
 							font-size: 30px;
 							font-weight: 500
 						}
+
 						span:nth-child(2) {
 							font-size: 10px;
-							color:#D3D3D3;
+							color: #D3D3D3;
 						}
 					}
 				}
-				.opreation{
+
+				.opreation {
 					display: flex;
 					height: 100px;
 					align-items: center;
-					justify-content:flex-end;
-					span{
+					justify-content: flex-end;
+
+					span {
 						font-size: 22px;
 						border: 1px solid #DADADA;
-						color:#9C9C9C;
+						color: #9C9C9C;
 						display: inline-block;
 						width: 140px;
 						text-align: center;
@@ -109,12 +117,14 @@
 						line-height: 50px;
 						border-radius: 10px;
 					}
-					span+span{
+
+					span+span {
 						margin-left: 20px;
 					}
 				}
 			}
-			li+li{
+
+			li+li {
 				margin-top: 15px;
 			}
 		}

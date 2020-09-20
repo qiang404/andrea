@@ -30,7 +30,7 @@ export default {
 <style lang="less" scoped>
 #address{
     background-color: #f6f6f6;
-    height: 1200px;
+    height: 1333px;
     .icon--add3{
         color: black;
         font-size: 50px;

@@ -14,7 +14,7 @@
 			</li>
 			<li>
 				<i class="iconfont icon-iconset0114"></i>
-				<input type="password" v-model="pwd" placeholder="请输入密码" />
+				<input type="password" v-model="pwd" placeholder="请输入密码" @keyup.enter="login"/>
 				<span>忘了?</span>
 			</li>
 		</ul>
@@ -43,29 +43,46 @@
 			},
 			login() {
 				if (this.pwd && this.tel) {
-					let config = {
+					let loginConfig = {
 						url: '/users/logincheck',
 						data: {
 							account: this.tel,
 							pwd: this.pwd
 						}
-
 					}
-					this.$request(config).then(res => {
+					this.$request(loginConfig).then(res => {
 						if (res.message === 'success' && res.status === 0) {
-							this.$store.commit('saveUser',res.table)
-							this.$store.commit('saveToken',res.token)
-							console.log(this.$route.params);
-							this.$router.push(this.$route.params.from)
+							console.log(res);
+							let getShopCarConfig = {
+								url: '/shopcar/query',
+								method: 'post',
+								data: {
+									uid: res.table.id,
+									token: res.token
+								}
+							}
+							this.$request(getShopCarConfig).then(res => {
+								if (res.status === 0) {
+									res.table.forEach(item => {
+										item.select = false
+									})
+									this.$store.commit('initGoods',res.table)
+								}
+							})
+							this.$toast('登录成功', 'center', 1000, () => {
+								this.$store.commit('saveUser', res.table)
+								this.$store.commit('saveToken', res.token)
+								if (this.$route.params.from == '/mine/register') this.$router.push('/mine')
+								else this.$router.push(this.$route.params.from)
+							})
 						} else if (res.message === '账号信息错误' && res.status === 1) {
-							alert('账号密码错误')
+							this.$toast('账号密码错误', 'center', 1000)
 						}
 					})
 				}
 			}
 		},
-		activated() {
-		}
+		activated() {}
 	};
 </script>
 <style lang="less" scoped>

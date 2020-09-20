@@ -2,17 +2,18 @@
   <div id="cart">
     <Header>
       <span slot="left"></span>
-      <span class="title" slot="middle">购物车({{ num }})</span>
+      <span class="title" slot="middle">购物车({{ this.$store.state.shopCarList.length }})</span>
       <span slot="right"></span>
     </Header>
-    <Goods :isChecked="isChecked"/>
+    <Goods :func="payCanUse" />
     <div class="pay">
       <div class="select">
-        <input type="radio" @click="checkAll" v-radio="changed" /><span>全选</span>
+        <input type="radio" id="selectAll" @click="checkAll" v-radio="changed"
+          :checked="this.$store.state.isCheckAll" :disabled="this.$store.state.shopCarList.length > 0 ? false : true" /><label for="selectAll">全选</label>
       </div>
       <div class="then">
-        <span>合计:<b>￥{{ tmoney }}</b></span>
-        <span>结算</span>
+        <span>合计:<b>￥{{ totalPrice }}</b></span>
+        <span @click="pay" :class="payCanUse?'':'disable'">结算</span>
       </div>
     </div>
     <Tabbar />
@@ -32,16 +33,52 @@
     },
     data() {
       return {
-        num: 3,
-        tmoney: 0,
         changed: false,
-        isChecked:false
+        product: [],
+        payGoods:[]
       };
     },
     methods: {
       checkAll() {
-        this.isChecked = !this.isChecked
+        this.$store.commit('changeIsCheckAll')
+        this.$store.commit('changeAllSelect')
+      },
+      pay() {
+        this.payGoods = []
+        if (this.payCanUse) {
+          this.$store.state.shopCarList.forEach(item => {
+            if (item.select) {
+              this.payGoods.push(item)
+            }
+          })
+          this.$store.commit('submitPayGoods',this.payGoods)
+          this.$router.push('/pay')
+        } else {
+          return
+        }
       }
+    },
+    computed: {
+      payCanUse() {
+        if (this.$store.state.hasCheckSomething) {
+          return true
+        } else {
+          return false
+        }
+      },
+      totalPrice() {
+        let sum = 0
+        let shopCarList = this.$store.state.shopCarList
+        if (shopCarList.length > 0) {
+          shopCarList.forEach(item => {
+            if (item.select) {
+              sum += item.stock * item.num
+            }
+          })
+        }
+        return sum
+      },
+      
     },
   };
 </script>
@@ -50,6 +87,7 @@
     .title {
       font-size: 40px;
     }
+
     .pay {
       background-color: #fff;
       position: fixed;
@@ -84,13 +122,19 @@
           display: inline-block;
           width: 200px;
           border-radius: 80px;
-          background-color: red;
           height: 70px;
           text-align: center;
           line-height: 70px;
           color: white;
+          background-color: red;
+          cursor: pointer;
         }
       }
+    }
+
+    .disable {
+      background-color: gray !important;
+      cursor: not-allowed !important;
     }
   }
 </style>

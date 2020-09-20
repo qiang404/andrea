@@ -1,49 +1,26 @@
 <template>
 	<div class="goods">
+		<Scroller>
 		<ul>
-			<li>
-				<input type="radio" @click="changeMe" v-radio="changed" :checked="isChecked" />
-				<img src="http://ehelp.hyyclub.xyz/images/swiper/cake1.png" />
+			<li v-for="(item,index) in productList" :key="item.pid">
+				<input type="radio" @click="changeMe(index)" v-radio="changed" :checked="item.select" />
+				<img :src="item.imageurl" />
 				<div class="context">
-					<p>松软牛角面包(纯手工)</p>
-					<span>无夹心</span>
-					<div class="cal">
-						<b>￥7.00</b>
-						<div>
-							<span>-</span><input type="text" value="1" /><span>+</span>
-						</div>
+					<div>
+					<p>{{item.name}} </p>
+						<i class="iconfont icon-lajitong" @tap="delGoods(index)"></i>
 					</div>
-				</div>
-			</li>
-				<li>
-				<input type="radio" :checked="isChecked" v-radio="changed" />
-				<img src="http://ehelp.hyyclub.xyz/images/swiper/cake1.png" />
-				<div class="context">
-					<p>松软牛角面包(纯手工)</p>
-					<span>无夹心</span>
+					<span>{{item.categoryname}}</span>
 					<div class="cal">
-						<b>￥7.00</b>
+						<b>￥{{item.stock}}</b>
 						<div>
-							<span>-</span><input type="text" value="1"/><span>+</span>
-						</div>
-					</div>
-				</div>
-			</li>
-				<li>
-				<input type="radio" v-radio="changed" :checked="isChecked" />
-				<img src="http://ehelp.hyyclub.xyz/images/swiper/cake1.png" />
-				<div class="context">
-					<p>松软牛角面包(纯手工)</p>
-					<span>无夹心</span>
-					<div class="cal">
-						<b>￥7.00</b>
-						<div>
-							<span>-</span><input type="text" value="1"/><span>+</span>
+							<span @tap="decNum(index)">-</span><input type="text" :value="item.num" /><span @tap="incNum(index)">+</span>
 						</div>
 					</div>
 				</div>
 			</li>
 		</ul>
+		</Scroller>
 	</div>
 </template>
 
@@ -52,28 +29,58 @@
 		name: 'Goods',
 		data() {
 			return {
-				changed:false,
-			}
-		},
-		props:{
-			isChecked:{
-				type:Boolean,
-				default:false
+				changed: false,
+				isCheckAll:false,
+				hasCheckSomething:false
 			}
 		},
 		methods: {
-			changeMe() {
+			changeMe(index) {
+				this.$store.commit('changeSelect',index)
+				this.isCheckAll = !this.$store.state.shopCarList.some(item => {
+					return !item.select
+				})
+				console.log(this.isCheckAll);
+				this.hasCheckSomething = this.$store.state.shopCarList.some(item => {
+					return item.select
+				})
+				this.$store.commit("changeCheckSomething",this.hasCheckSomething)
+				this.$store.commit('changeIsCheckAll',this.isCheckAll)
 				
+			},
+			decNum(index) {
+				this.$store.commit('decNum', index)
+
+			},
+			incNum(index) {
+				this.$store.commit('incNum', index)
+
+			},
+			delGoods(index) {
+				this.$messageBox('确定删除吗？',this.removeGoods(index),this)
+			},
+			removeGoods(index) {
+				return function () {
+					this.$store.commit('deleteShopCarList',index)
+					if (this.$store.state.shopCarList.length <= 0) {
+					this.$store.commit('changeIsCheckAll',false)
+				}
+				}
 			}
-		}
+		},
+		computed: {
+			productList() {
+				return this.$store.state.shopCarList
+			}
+		},
 	}
 </script>
 <style lang="less" scoped>
 	.goods {
 		background-color: #f6f6f6;
-		height: 1200px;
-		overflow: auto;
-
+		height: 1000px;
+		overflow: hidden;
+		padding-bottom: 20px;
 		ul {
 			li {
 				background-color: #fff;
@@ -99,9 +106,14 @@
 					height: 100%;
 					flex: 1;
 					justify-content: space-around;
-					// align-items: center;
-
-					span{
+					&>div{
+						display: flex;
+						justify-content: space-between;
+						i{
+							font-size: 50px;
+						}
+					}
+					span {
 						font-size: 12px;
 						color: #6c6c6c;
 						margin-top: -10px;
@@ -114,7 +126,7 @@
 
 				.cal {
 					display: flex;
-					justify-content:space-between;
+					justify-content: space-between;
 
 					input {
 						height: 40px;
@@ -127,9 +139,11 @@
 						justify-content: flex-end;
 						text-align: center;
 					}
-					&>div{
+
+					&>div {
 						display: flex;
 					}
+
 					span {
 						display: inline-block;
 						width: 40px;

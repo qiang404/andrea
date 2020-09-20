@@ -6,7 +6,7 @@
         <input  type="text" placeholder="请输入蛋糕名称" v-model="keyword"> 
       </div>
       <p v-else slot="middle" >安德莉亚</p>
-      <i slot="right" class="iconfont icon-sousuo" @click="toggle"></i>
+      <i slot="right" class="iconfont" :class="isSearch?'icon-cha':'icon-sousuo'" @click="toggle"></i>
     </Header>
     <Swiper v-if="swiperList" :swiperList="swiperList"/>
     <Menu  :newsList="newsList" />

@@ -6,6 +6,14 @@
       <span slot="right"></span>
     </Header>
     <div class="body">
+      <div class="upLoad">
+        <label for="">上传头像</label>
+        <div>
+          <p v-if="!hasUpload">选择图片</p>
+          <img v-else id="upFile">
+          <input type="file" @change="getImg">
+        </div>
+      </div>
       <div>
         <label for="unmae">用户名</label>
         <input id="unmae" type="text" v-model="uname" placeholder="请输入用户名">
@@ -48,6 +56,9 @@
         password: '',
         phoneFlag: false,
         pwdFlag: false,
+        imgurl: '',
+        userimg: '',
+        hasUpload: false
       }
     },
     methods: {
@@ -71,25 +82,56 @@
         }
       },
       register() {
-        let data =`{username:'${this.uname}',gendar:${this.gender},phone:'${this.phone}',pwd:'${this.password}'}`
-        if (this.uname && this.phone && this.password && !this.phoneFlag && !this.pwdFlag) {
-          let config = {
-            url: '/users/register',
-            data: {
-              data: data
+        if (this.uname && this.phone && this.password && this.hasUpload && !this.phoneFlag && !this.pwdFlag) {
+          this.upLoadImg().then(res => {
+            if (!res.status) {
+              this.$toast('注册失败', 'center', 1000)
+              return
             }
-          }
-          this.$request(config).then(res => {
-           if (res.message === 'success' && res.status === 0) {
-             alert('注册成功')
-             this.$router.push('/mine/login')
-           } else if (res.message === '账号已存在' && res.status === 0) {
-             alert('账号已存在')
-           } else {
-             alert('注册失败')
-           }
+            this.userimg = res.url
+            let data =
+              `{username:'${this.uname}',gendar:${this.gender},phone:'${this.phone}',pwd:'${this.password}',imgurl:'${this.userimg}'}`
+            let config = {
+              url: '/users/register',
+              data: {
+                data: data
+              }
+            }
+            this.$request(config).then(res => {
+              if (res.message === 'success' && res.status === 0) {
+                this.$toast('注册成功','center',1000,() => this.$router.push('/mine/login')
+                )
+              } else if (res.message === '账号已存在' && res.status === 0) {
+                this.$toast('账号已存在','center',1000)
+              } else {
+                this.$toast('注册失败','center',1000)
+              }
+            })
           })
+        } else {
+          this.$toast('信息不能为空','center',1000)
         }
+      },
+      getImg(e) {
+        let fileReader = new FileReader()
+        this.userimg = e.target.files
+        this.hasUpload = true
+        fileReader.readAsDataURL(this.userimg[0])
+        fileReader.onloadend = function (oFRevent) {
+          this.imgurl = oFRevent.target.result;
+          let userimg = document.getElementById("upFile")
+          userimg.setAttribute("src", this.imgurl)
+        }
+      },
+      upLoadImg() {
+        let formData = new FormData();
+        formData.append("action", "upresumefile"); //调用它的append()方法来添加字段
+        for (let i = 0; i < this.userimg.length; i++) {
+          formData.append("file[]", this.userimg[i]);
+        }
+        return new Promise(resolve => {
+          this.$axios.post('http://101.200.88.248:8044//users/imgupload', formData).then(res => resolve(res.data))
+        })
       }
     },
   }
@@ -115,7 +157,48 @@
       display: flex;
       flex-direction: column;
 
+      .upLoad {
+        position: relative;
+
+        &>div {
+          margin-left: -30px;
+
+        }
+
+        p {
+          position: absolute;
+          width: 140px;
+          height: 140px;
+          border-radius: 50%;
+          border: 1px solid #c2bfbf;
+          text-align: center;
+          display: flex;
+          align-items: center;
+          padding-left: 8px;
+          cursor: pointer;
+          background-color: aqua;
+          box-sizing: border-box;
+        }
+
+        input {
+          opacity: 0;
+          height: 100%;
+          width: 140px;
+          height: 140px;
+          border-radius: 50%;
+        }
+
+        img {
+          position: absolute;
+          width: 140px;
+          height: 140px;
+          border-radius: 50%;
+          border: 1px solid #c2bfbf;
+        }
+      }
+
       .gender {
+        height: 140px;
         display: flex;
         align-items: center;
 
@@ -152,7 +235,7 @@
 
       .rbtn {
         width: 600px;
-        margin: 400px auto 100px;
+        margin: 290px auto 100px;
         display: block;
         background-color: #f18d94;
         color: white;

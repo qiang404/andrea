@@ -67,17 +67,16 @@ Vue.use(VueRouter)
             name: 'Register'
         }
     ],
-    name: 'Mine'
+    name: 'Mine',
   },
   {
-    path:'/address',
-    component: () => import('@/components/Address/index.vue'),
-    name: 'Address'
+    path:'/pay',
+    component: () => import('@/components/Pay/index.vue'),
+    name: 'Pay',
+    meta:{
+      requireAuth:true
+    }
   },
-  {
-    path: '/toast',
-    component: () => import('@/components/common/Toast/toast')
-  }
 ]
 
 const router = new VueRouter({
@@ -88,7 +87,8 @@ const router = new VueRouter({
 })
 router.beforeEach((to, from, next) => {
   if (to.meta.requireAuth && !store.state.token) {
-    next({name: 'Login',params:{from:to.path}})
+    if (to.path == '/pay') next({name:'Home'})
+    else next({name: 'Login',params:{from:to.path}})
   }
   else {
     next()
