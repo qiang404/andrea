@@ -27,15 +27,32 @@ export function throttle(func, wait) {
 	}
 }
 
-export function pushToCart(poduct) {
-	if (!this.$store.state.token) {
+export function pushToCart(poduct,id,count) {
+	if (!this.$store.state.user.token) {
 		this.$toast('请先登录!','center',1000,() => {
       this.$router.push('/mine/login')    
 		})
 		return false
 	} else {
-		this.$store.commit('addGoods', poduct)
-		this.$toast('加入购物车成功!','center',1000)
+		let config = {
+			method:'post',
+			url:'/shopcar/add',
+			data:{
+			  uid:this.$store.state.user.uid,
+			  token:this.$store.state.user.token,
+			  pid:id,
+			  count:count
+			}
+		  }
+		this.$request(config).then(res => {
+			if (res.status === 0) {
+				this.$store.commit('addGoods', poduct)
+				this.$toast('加入购物车成功!','center',1000)
+			} else {
+				this.$toast('加入购物车失败!','center',1000)
+			}
+		})
+		
 		return true
 	}
 }

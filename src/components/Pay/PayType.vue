@@ -1,9 +1,9 @@
 <template>
     <div v-show="isShow" class="showPayType" @click="cancel">
         <div class="payWarp">
-            <p :class="active?'active':''" @click="changePayType">微信支付</p>
-            <p :class="!active?'active':''"  @click="changePayType">支付宝支付</p>
-            <p><span @click="cancel">取消</span></p>
+            <p :class="active?'active':''" @click="changePayType('zfb')"><span>支付宝支付</span><i class="iconfont icon-duigou"></i></p>
+            <p :class="!active?'active':''"  @click="changePayType('wx')"><span>微信支付</span><i class="iconfont icon-duigou"></i></p>
+            <p  @click="cancel"><span>取消</span></p>
         </div>
     </div>
 </template>
@@ -19,15 +19,15 @@
         },
         data() {
             return {
-                active:true
+                active:true,
             }
         },
         methods: {
             cancel() {
                 this.$emit('callback',false,this.active)
             },
-            changePayType() {
-                this.active = !this.active
+            changePayType(type) {
+                type === 'wx' ? this.active = false : this.active = true
             }
         },
     }
@@ -60,6 +60,7 @@
                 font-size: 32px;
                 display: flex;
                 align-items: center;
+                justify-content: space-between;
                 &:nth-child(3){
                     justify-content: center;
                     span{

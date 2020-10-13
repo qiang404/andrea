@@ -4,11 +4,11 @@
       <Scroller v-if="searchRes" :handleToPullUp="getMoreCakes" ref="scroll">
         <ul>
           <li class="cake" v-for="(item,index) in productList" :key="item.id">
-            <img @tap="handleToDetail(item.name)" v-lazy="item.imageurl" alt="" />
-            <p @tap="handleToDetail(item.name)">{{ item.name }}</p>
+            <img @tap="handleToDetail(item.id)" v-lazy="item.imageurl" alt="" />
+            <p @tap="handleToDetail(item.id)">{{ item.name }}</p>
             <div class="price">
-              <b>￥{{ item.stock }}</b>
-              <i class="iconfont icon-gouwuche" @tap="addGoods(index)"></i>
+              <b>￥{{ item.price }}</b>
+              <i class="iconfont icon-gouwuche" @tap="addGoods(index,item.id)"></i>
             </div>
           </li>
         </ul>
@@ -57,11 +57,21 @@ import {pushToCart} from '@/assets/js/Ulits'
           this.$refs.scroll.scroll.finishPullUp();
         }
       },
-      handleToDetail(name) {
-          this.$router.push("/detail/" + name);
+      handleToDetail(id) {
+          this.$router.push("/detail/" + id);
       },
-      addGoods(index) {
-        pushToCart.call(this,[this.productList[index]])
+      addGoods(index,id) {
+        pushToCart.call(this,[this.productList[index]],id,1)
+        //   let config = {
+        //   method:'post',
+        //   url:'/shopcar/add',
+        //   data:{
+        //     uid:this.$store.state.user.id,
+        //     token:this.$store.state.token,
+        //     pid:id
+        //   }
+        // }
+        // this.$request(config).then(res => console.log(res))
       }
     },
     updated() {

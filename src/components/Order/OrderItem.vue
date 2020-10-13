@@ -1,38 +1,30 @@
 <template>
 	<div class="orderItem">
 		<ul>
-			<li>
+			<li v-for="item in orderDetailList" :key="item.ordernumber">
 				<div class="orderNum">
-					<span>订单号：20200309162</span>
-					<span>进行中</span>
+					<span>订单号：{{item.ordernumber}}</span>
+					<span v-if="item.paystatus === 0">待支付</span>
+					<span v-else-if="item.paystatus === 1">进行中</span>
+					<span v-else-if="item.paystatus === 2">已完成</span>
+					<span v-else-if="item.paystatus === 3">已取消</span>
 				</div>
-				<div class="main">
-					<img src="http://101.200.88.248:8044/img/5.png">
+				<div class="main" v-for="x in item.OrderList" :key="x.odid">
+					<img :src="x.imgurl">
 					<div class="intro">
-						<span>鲜奶油双层蛋糕--皇冠款</span>
-						<span>价格6寸128 8寸208</span>
-						<span>￥128.00</span>
+						<span>{{ x.name}}</span>
+						<span>数量{{x.number}} 价格{{x.price.toFixed(2)}}</span>
+						<span>￥{{(x.price * x.number).toFixed(2)}} </span>
 					</div>
 				</div>
-				<div class="opreation">
-					<span>取消预约</span><span>确认收货</span>
+				<div class="opreation" v-if="item.paystatus === 0">
+					<span @click="cancelOrder(item.id)">取消订单</span><span @click="toPay(item)">去支付</span>
 				</div>
-			</li>
-			<li>
-				<div class="orderNum">
-					<span>订单号：20200309162</span>
-					<span>进行中</span>
+				<div class="opreation" v-else-if="item.paystatus === 1">
+					<span @click="cancelBook">取消预约</span><span @click="confimReceive(item.id)">确认收货</span>
 				</div>
-				<div class="main">
-					<img src="http://101.200.88.248:8044/img/5.png">
-					<div class="intro">
-						<span>鲜奶油双层蛋糕--皇冠款</span>
-						<span>价格6寸128 8寸208</span>
-						<span>￥128.00</span>
-					</div>
-				</div>
-				<div class="opreation">
-					<span>取消预约</span><span>确认收货</span>
+				<div class="opreation" v-else-if="item.paystatus === 2 || item.paystatus === 3">
+					<span>删除订单</span><span>查看订单</span>
 				</div>
 			</li>
 		</ul>
@@ -42,8 +34,58 @@
 <script>
 	export default {
 		name: 'OrderItem',
-
-
+		props: {
+			orderDetailList: {
+				type: Array,
+				default: []
+			}
+		},
+		methods: {
+			cancelBook() {
+			},
+			confimReceive(oid) {
+				this.$messageBox('确认收货吗', () => {
+					this.$request({
+						method: 'post',
+						url: '/order/changeorder',
+						data: {
+							uid: this.$store.state.user.uid,
+							token: this.$store.state.user.token,
+							oid: oid,
+							payState: 2
+						}
+					}).then(res => {
+						if (res.status === 0) {
+							this.$bus.$emit('orderUpdate')
+							this.$toast('确认收货成功', 'center', 1000)
+						}
+					}, this)
+				})
+			},
+			cancelOrder(oid) {
+				this.$messageBox('确定取消订单吗', () => {
+					this.$request({
+						method: 'post',
+						url: '/order/changeorder',
+						data: {
+							uid: this.$store.state.user.uid,
+							token: this.$store.state.user.token,
+							oid: oid,
+							payState: 3
+						}
+					}).then(res => {
+						if (res.status === 0) {
+							this.$toast('取消订单成功', 'center', 1000)
+							this.$bus.$emit('orderUpdate')
+						}
+					}, this)
+				})
+			},
+			toPay(item) {
+				this.$store.commit('submitPayGoods',item.OrderList)
+				this.$router.push('/pay/'+item.id)
+			}
+		},
 	}
 </script>
 <style lang="less" scoped>

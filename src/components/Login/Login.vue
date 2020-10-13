@@ -14,7 +14,7 @@
 			</li>
 			<li>
 				<i class="iconfont icon-iconset0114"></i>
-				<input type="password" v-model="pwd" placeholder="请输入密码" @keyup.enter="login"/>
+				<input type="password" v-model="pwd" placeholder="请输入密码" @keyup.enter="login" />
 				<span>忘了?</span>
 			</li>
 		</ul>
@@ -51,34 +51,53 @@
 						}
 					}
 					this.$request(loginConfig).then(res => {
-						if (res.message === 'success' && res.status === 0) {
-							console.log(res);
-							let getShopCarConfig = {
-								url: '/shopcar/query',
-								method: 'post',
-								data: {
-									uid: res.table.id,
-									token: res.token
+							if (res.message === 'success' && res.status === 0) {
+								let getShopCarConfig = {
+									url: '/shopcar/query',
+									method: 'post',
+									data: {
+										uid: res.table.id,
+										token: res.token
+									}
 								}
+								let getAddressConfig = {
+									method: "post",
+									url: "/address/querybyuser",
+									data: {
+										uid: res.table.id,
+										token: res.token
+									}
+								}
+								this.$request(getAddressConfig).then(res => {
+									this.$store.commit('clearAddress')
+									this.$store.commit('saveAddress', res.table)
+								})
+								this.$toast('登录成功', 'center', 1000, () => {
+									let user = {
+										uid: res.table.id,
+										imgurl: res.table.imgurl,
+										token: res.token
+									}
+									this.$store.commit('saveUser', user)
+									window.sessionStorage.setItem("user",JSON.stringify(user) )
+									if (this.$route.params.from == '/mine/register') this.$router.push('/mine')
+									else this.$router.push(this.$route.params.from)
+								})
+								return this.$request(getShopCarConfig)
+							} else if (res.message === '账号信息错误' && res.status === 1) {
+								this.$toast('账号密码错误', 'center', 1000)
 							}
-							this.$request(getShopCarConfig).then(res => {
-								if (res.status === 0) {
-									res.table.forEach(item => {
-										item.select = false
-									})
-									this.$store.commit('initGoods',res.table)
-								}
-							})
-							this.$toast('登录成功', 'center', 1000, () => {
-								this.$store.commit('saveUser', res.table)
-								this.$store.commit('saveToken', res.token)
-								if (this.$route.params.from == '/mine/register') this.$router.push('/mine')
-								else this.$router.push(this.$route.params.from)
-							})
-						} else if (res.message === '账号信息错误' && res.status === 1) {
-							this.$toast('账号密码错误', 'center', 1000)
-						}
-					})
+						})
+						.then(res => {
+							if (res.status === 0) {
+								res.table.forEach(item => {
+									item.select = false
+								})
+								this.$store.commit('initGoods', res.table)
+							}
+						})
+				} else {
+					this.$toast("账号密码不能为空", 'center', 1000)
 				}
 			}
 		},
@@ -89,7 +108,12 @@
 	#login {
 		background-color: #fff;
 		overflow: auto;
-
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index:100;
 		.title {
 			font-size: 40px;
 			margin-left: 260px;

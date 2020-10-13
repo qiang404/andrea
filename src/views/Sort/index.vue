@@ -22,7 +22,7 @@
   import Tabbar from "@/components/common/Tabbar";
   import Sortnav from "@/views/Sort/Sortnav";
   import Swiper from "@/components/common/Swiper";
-  import Products from "@/components/Products";
+  import Products from "@/components/Products/Products";
   import {
     getBanner
   } from '@/network/getBanner'

@@ -9,7 +9,7 @@
     <div class="name">
       <span>
         <p>{{ productDetail.name }}</p>
-        <b>{{ productDetail.stock }}</b>
+        <b>{{ productDetail.price }}</b>
       </span>
       <span>库存{{ productDetail.stock }}</span>
     </div>
@@ -70,16 +70,28 @@
         this.$router.push('/home')
       },
       addGoods() {
-        pushToCart.call(this, [this.productDetail])
+        pushToCart.call(this, [this.productDetail],this.$route.params.id,1)
+      
       },
       buy() {
-        // this.$router.push('/pay')
-        if (this.$store.state.token) {
+        if (this.$store.state.user.token) {
           this.productDetail.pid = this.productDetail.id
           this.productDetail.num = 1
           let payGoods = [this.productDetail]
           this.$store.commit('submitPayGoods',payGoods)
-          this.$router.push('/pay')
+          this.$request({
+            method:'post',
+            url:'/order/addorder',
+            data:{
+              uid:this.$store.state.user.uid,
+              token:this.$store.state.user.token,
+              pid:this.$route.params.id
+            }
+          }).then(res => {
+             if (res.status === 0) {
+                this.$router.push('/pay/'+res.orderid)
+            }
+          })
         } else {
           this.$toast('请先登录', 'center', 1000, () => {
             this.$router.push('/mine/login')
@@ -88,9 +100,15 @@
       }
     },
     activated() {
-      getProduct(1, 1, this.$route.params.name, '', ).then(res => {
+        this.$request({
+          url:'product/getproduct',
+          method:'post',
+          data:{
+            pid:this.$route.params.id
+          }
+        }).then(res => {
           this.productDetail = res[0]
-        }),
+          })
         getBanner(3, res => {
           this.swiperList = res
         })

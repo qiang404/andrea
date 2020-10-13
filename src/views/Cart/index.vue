@@ -52,9 +52,28 @@
             }
           })
           this.$store.commit('submitPayGoods',this.payGoods)
-          this.$router.push('/pay')
-        } else {
-          return
+          let carList = []
+          this.payGoods.forEach(item => {
+            let obj = {}
+            obj.pid = item.pid
+            obj.number = item.num
+            carList.push(obj)
+          })
+          this.$request({
+            method:'post',
+            url:'order/addorder',
+            data:{
+              uid:this.$store.state.user.uid,
+              token:this.$store.state.user.token,
+              shopcarlist:JSON.stringify(carList)
+            }
+          }).then(res => {
+            if (res.status === 0) {
+                this.$store.commit('removePayItem')
+                // this.$store.commit('submitPayGoods',[])
+                this.$router.push('/pay/'+res.oid)
+            }
+          })
         }
       }
     },
@@ -72,11 +91,11 @@
         if (shopCarList.length > 0) {
           shopCarList.forEach(item => {
             if (item.select) {
-              sum += item.stock * item.num
+              sum += item.price * item.num
             }
           })
         }
-        return sum
+        return sum.toFixed(2)
       },
       
     },

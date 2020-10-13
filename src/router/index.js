@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import store from '@/store'
-import MineRouter from './Mine'
 
 const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(location, onResolve, onReject) {
@@ -33,11 +32,11 @@ Vue.use(VueRouter)
     name:'Cart',
     meta: {
       requireAuth:true
-    }
+    },
   },
   
   {
-    path :'/detail/:name',
+    path :'/detail/:id',
     component:() => import('@/components/Detail'),
     name:'Detail'
   },
@@ -49,13 +48,16 @@ Vue.use(VueRouter)
     },
     children: [{
             path: 'login',
-            component: () => import('@/components/Login'),
+            component: () => import('@/components/Login/Login.vue'),
             name: 'Login',
             meta: {
               from:''
             },
             beforeEnter: (to, from, next) => {
-              if (Object.keys(to.params).length === 0) {
+              if (store.state.user.token!=null || window.sessionStorage.getItem('user') != null) {
+                next({name:'Mine'})
+              }
+              else if (Object.keys(to.params).length === 0) {
                 to.params.from = from.path
               }
               next()
@@ -63,20 +65,45 @@ Vue.use(VueRouter)
         },
         {
             path: 'register',
-            component: () => import('@/components/Register'),
+            component: () => import('@/components/Register/Register.vue'),
             name: 'Register'
         }
     ],
     name: 'Mine',
   },
   {
-    path:'/pay',
+    path:'/pay/:oid',
     component: () => import('@/components/Pay/index.vue'),
     name: 'Pay',
     meta:{
       requireAuth:true
-    }
+    },
   },
+  {
+    path:'/order',
+    component: () => import('@/components/Order/index.vue'),
+    name: 'Order',
+  },
+  { 
+      path:'/store',
+      component:() => import("@/components/Pay/SelectStore.vue"),
+      name:'Store'
+  },
+  {
+    path:'/address',
+    component:() => import("@/components/Address"),
+    name:'Address',
+    children:[{
+      path:'addaddress',
+      component:() => import("@/components/Address/AddAddress"),
+      name:"AddAddress"
+    }]
+  },
+  {
+    path:'/paysuccess/:oid',
+    component:() => import("@/components/PaySuccess/PaySuccess.vue"),
+    name:'PaySuccess'
+  }
 ]
 
 const router = new VueRouter({
@@ -86,9 +113,12 @@ const router = new VueRouter({
   
 })
 router.beforeEach((to, from, next) => {
-  if (to.meta.requireAuth && !store.state.token) {
-    if (to.path == '/pay') next({name:'Home'})
-    else next({name: 'Login',params:{from:to.path}})
+  if (to.meta.requireAuth ) { 
+    if (!store.state.user.token && window.sessionStorage.getItem('user') == null) {
+      next({name: 'Login',params:{from:to.path}})
+    } else {
+      next()
+    }
   }
   else {
     next()

@@ -1,70 +1,111 @@
 <template>
 	<div class="goods">
 		<Scroller>
-		<ul>
-			<li v-for="(item,index) in productList" :key="item.pid">
-				<input type="radio" @click="changeMe(index)" v-radio="changed" :checked="item.select" />
-				<img :src="item.imageurl" />
-				<div class="context">
-					<div>
-					<p>{{item.name}} </p>
-						<i class="iconfont icon-lajitong" @tap="delGoods(index)"></i>
-					</div>
-					<span>{{item.categoryname}}</span>
-					<div class="cal">
-						<b>￥{{item.stock}}</b>
+			<ul>
+				<li v-for="(item,index) in productList" :key="item.pid">
+					<input type="radio" @click="changeMe(index)" v-radio="changed" :checked="item.select" />
+					<img :src="item.imageurl" />
+					<div class="context">
 						<div>
-							<span @tap="decNum(index)">-</span><input type="text" :value="item.num" /><span @tap="incNum(index)">+</span>
+							<p>{{item.name}} </p>
+							<i class="iconfont icon-lajitong" @tap="delGoods(index,item.pid)"></i>
+						</div>
+						<span>{{item.categoryname}}</span>
+						<div class="cal">
+							<b>￥{{item.price}}</b>
+							<div>
+								<span @tap="decNum(index,item)">-</span><input type="text" :value="item.num" /><span
+									@tap="incNum(index,item)">+</span>
+							</div>
 						</div>
 					</div>
-				</div>
-			</li>
-		</ul>
+				</li>
+			</ul>
 		</Scroller>
 	</div>
 </template>
 
 <script>
+	import {
+		pushToCart
+	} from '@/assets/js/Ulits'
 	export default {
 		name: 'Goods',
 		data() {
 			return {
 				changed: false,
-				isCheckAll:false,
-				hasCheckSomething:false
+				isCheckAll: false,
+				hasCheckSomething: false
 			}
 		},
 		methods: {
 			changeMe(index) {
-				this.$store.commit('changeSelect',index)
+				this.$store.commit('changeSelect', index)
 				this.isCheckAll = !this.$store.state.shopCarList.some(item => {
 					return !item.select
 				})
-				console.log(this.isCheckAll);
 				this.hasCheckSomething = this.$store.state.shopCarList.some(item => {
 					return item.select
 				})
-				this.$store.commit("changeCheckSomething",this.hasCheckSomething)
-				this.$store.commit('changeIsCheckAll',this.isCheckAll)
-				
-			},
-			decNum(index) {
-				this.$store.commit('decNum', index)
+				this.$store.commit("changeCheckSomething", this.hasCheckSomething)
+				this.$store.commit('changeIsCheckAll', this.isCheckAll)
 
 			},
-			incNum(index) {
-				this.$store.commit('incNum', index)
-
-			},
-			delGoods(index) {
-				this.$messageBox('确定删除吗？',this.removeGoods(index),this)
-			},
-			removeGoods(index) {
-				return function () {
-					this.$store.commit('deleteShopCarList',index)
-					if (this.$store.state.shopCarList.length <= 0) {
-					this.$store.commit('changeIsCheckAll',false)
+			decNum(index, item) {
+				if (item.num >= 1) {
+					this.$request({
+						method: "post",
+						url: "/shopcar/add",
+						data: {
+							uid: this.$store.state.user.uid,
+							token: this.$store.state.user.token,
+							pid: item.pid,
+							count: -1
+						}
+					}).then(res => {
+						if (res.status === 0) {
+							this.$store.commit('decNum', index)
+						}
+					})
 				}
+
+			},
+			incNum(index, item) {
+				this.$request({
+					method: "post",
+					url: "/shopcar/add",
+					data: {
+						uid: this.$store.state.user.uid,
+						token: this.$store.state.user.token,
+						pid: item.pid,
+						count: 1
+					}
+				}).then(res => {
+					if (res.status === 0) {
+						this.$store.commit('incNum', index)
+					}
+				})
+
+			},
+			delGoods(index, pid) {
+				this.$messageBox('确定删除吗？', this.removeGoods(index, pid), this)
+			},
+			removeGoods(index, pid) {
+				return function () {
+					this.$store.commit('deleteShopCarList', index)
+					let config = {
+						method: 'post',
+						url: '/shopcar/delete',
+						data: {
+							uid: this.$store.state.user.uid,
+							token: this.$store.state.user.token,
+							pid: pid
+						}
+					}
+					this.$request(config).then(res => console.log(res))
+					if (this.$store.state.shopCarList.length <= 0) {
+						this.$store.commit('changeIsCheckAll', false)
+					}
 				}
 			}
 		},
@@ -81,6 +122,7 @@
 		height: 1000px;
 		overflow: hidden;
 		padding-bottom: 20px;
+
 		ul {
 			li {
 				background-color: #fff;
@@ -106,13 +148,16 @@
 					height: 100%;
 					flex: 1;
 					justify-content: space-around;
-					&>div{
+
+					&>div {
 						display: flex;
 						justify-content: space-between;
-						i{
+
+						i {
 							font-size: 50px;
 						}
 					}
+
 					span {
 						font-size: 12px;
 						color: #6c6c6c;
